@@ -60,11 +60,17 @@
                                         implementation="com.max.maven.design.checker.NoPackageCyclesRule">
                                     <mainPackage>com.max.maven.design.checker</mainPackage>
                                 </NoPackageCyclesRule>
+
                                 <DistanceFromMainSequenceRule
                                         implementation="com.max.maven.design.checker.DistanceFromMainSequenceRule">
                                     <mainPackage>com.max.maven.design.checker</mainPackage>
                                     <threshold>0.5</threshold>
                                 </DistanceFromMainSequenceRule>
+
+                                <StableDependencyRule
+                                        implementation="com.max.maven.design.checker.StableDependencyRule">
+                                    <mainPackage>com.max.maven.design.checker</mainPackage>
+                                </StableDependencyRule>
                             </rules>
                         </configuration>
                     </execution>
