@@ -1,45 +1,131 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  <groupId>com.max</groupId>
-  <artifactId>maven-design-checker</artifactId>
-  <packaging>jar</packaging>
-  <version>1.0-SNAPSHOT</version>
-  <name>maven-design-checker</name>
-  <url>http://maven.apache.org</url>
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
-  <properties>
-    <java.version>1.8</java.version>
-  </properties>
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.max</groupId>
+    <artifactId>maven-design-checker</artifactId>
+    <packaging>jar</packaging>
+    <version>1.0.0-SNAPSHOT</version>
+    <name>maven-design-checker</name>
+    <url>https://github.com/mstepan/maven-design-checker</url>
 
-  <build>
-    <plugins>
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <java.version>1.8</java.version>
+        <jdepend.version>2.9.5</jdepend.version>
+        <enforcer.api.version>1.4.1</enforcer.api.version>
+    </properties>
 
-      <!-- Java compile plugin -->
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.0</version>
-        <configuration>
-          <source>${java.version}</source>
-          <target>${java.version}</target>
-          <encoding>UTF-8</encoding>
-          <showDeprecation>true</showDeprecation>
-          <showWarnings>true</showWarnings>
-          <executable>$(/usr/libexec/java_home -v 1.8)/bin/javac</executable>
-          <fork>true</fork>
-        </configuration>
-      </plugin>
+    <build>
+        <plugins>
 
-    </plugins>
-  </build>
+            <!-- Java compile plugin -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.0</version>
+                <configuration>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
+                    <encoding>UTF-8</encoding>
+                    <showDeprecation>true</showDeprecation>
+                    <showWarnings>true</showWarnings>
+                    <executable>$(/usr/libexec/java_home -v 1.8)/bin/javac</executable>
+                    <fork>true</fork>
+                </configuration>
+            </plugin>
 
-  <dependencies>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>3.8.1</version>
-      <scope>test</scope>
-    </dependency>
-  </dependencies>
+            <!-- Custom plugin which checks package cycles using JDepend -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <version>3.0.0-M1</version>
+                <dependencies>
+                    <dependency>
+                        <groupId>com.max</groupId>
+                        <artifactId>maven-design-checker</artifactId>
+                        <version>1.0.0-SNAPSHOT</version>
+                    </dependency>
+                </dependencies>
+                <executions>
+                    <execution>
+                        <id>maven-design-checker</id>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <phase>verify</phase> <!-- use a phase after compile! -->
+                        <configuration>
+                            <rules>
+                                <NoPackageCyclesRule
+                                        implementation="com.max.maven.design.checker.NoPackageCyclesRule">
+                                    <mainPackage>com.max.maven.design.checker</mainPackage>
+                                </NoPackageCyclesRule>
+                                <DistanceFromMainSequenceRule
+                                        implementation="com.max.maven.design.checker.DistanceFromMainSequenceRule">
+                                    <mainPackage>com.max.maven.design.checker</mainPackage>
+                                    <threshold>0.5</threshold>
+                                </DistanceFromMainSequenceRule>
+                            </rules>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+        </plugins>
+    </build>
+
+    <dependencies>
+
+        <!-- enforcer plugin + maven core dependencies -->
+        <dependency>
+            <groupId>org.apache.maven.enforcer</groupId>
+            <artifactId>enforcer-api</artifactId>
+            <version>1.4.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.maven</groupId>
+            <artifactId>maven-project</artifactId>
+            <version>3.0-alpha-2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.maven</groupId>
+            <artifactId>maven-core</artifactId>
+            <version>3.5.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.maven</groupId>
+            <artifactId>maven-artifact</artifactId>
+            <version>3.5.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.maven</groupId>
+            <artifactId>maven-plugin-api</artifactId>
+            <version>3.5.0</version>
+        </dependency>
+
+        <!-- Fork of official JDepend version which support java 8 -->
+        <dependency>
+            <groupId>guru.nidi</groupId>
+            <artifactId>jdepend</artifactId>
+            <version>${jdepend.version}</version>
+        </dependency>
+
+
+        <!-- @Nonnull, @Nullable annotations -->
+        <dependency>
+            <groupId>com.google.code.findbugs</groupId>
+            <artifactId>jsr305</artifactId>
+            <version>3.0.2</version>
+        </dependency>
+
+        <!-- JUnit -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.12</version>
+            <scope>test</scope>
+        </dependency>
+
+    </dependencies>
+
 </project>
